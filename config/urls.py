@@ -18,6 +18,7 @@ urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
     # User management
     path("users/", include("weather_data_api.users.urls", namespace="users")),
+    path("data/", include("weather_data_api.coordsapp.urls", namespace="data")),
     path("accounts/", include("allauth.urls")),
     # Your stuff: custom urls includes go here
     # ...

@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Download Coordinates</title>
+</head>
+<body>
+    <h1>Coordinates Submitted</h1>
+    <p>Latitude: {{ lat }}</p>
+    <p>Longitude: {{ lon }}</p>
+    <a href="{% url 'download_file' %}?lat={{ lat }}&lon={{ lon }}">
+        <button>Download File</button>
+    </a>
+</body>
+</html>
