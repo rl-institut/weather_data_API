@@ -15,7 +15,7 @@ def coordinates_form(request):
         grid_step = 0.5
         lat_grid = ((lat + grid_step) // grid_step) * grid_step
         lon_grid = ((lon + grid_step) // grid_step) * grid_step
-        ds = xr.open_dataset(staticfiles_storage.path("data.nc"))
+        ds = xr.open_dataset(staticfiles_storage.path("data-instant.nc"))
         dt = ds.sel(latitude=lat_grid, longitude=lon_grid)
         df = dt.to_dataframe()
         idx = df.index
