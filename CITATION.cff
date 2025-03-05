@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: 2022 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: super-repo v0.5.0 <https://github.com/rl-institut/super-repo>
+# SPDX-License-Identifier: CC0-1.0
+
+cff-version: 1.2.0
+message: "If you use this software, please cite it using these metadata."
+authors:
+  - family-names: "Hülk"
+    given-names: "Ludwig"
+    alias: "Ludee"
+    affiliation: "Reiner Lemoine Institut"
+    orcid: "https://orcid.org/0000-0003-4655-2321"
+  - family-names: "Huber"
+    given-names: "Jonas"
+    alias: "jh-rli"
+    affiliation: "Reiner Lemoine Institut"
+    orcid: "https://orcid.org/0000-0002-6234-0751"
+title: "Super Repo"
+type: software
+license: MIT
+version: 0.5.0
+doi: null
+date-released: 2024-12-09
+url: "https://github.com/rl-institut/super-repo/"

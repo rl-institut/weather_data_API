@@ -1,0 +1,104 @@
+# SPDX-FileCopyrightText: 2022 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2022 Jonas Huber <https://github.com/jh-rli> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: super-repo v0.5.0 <https://github.com/rl-institut/super-repo>
+# SPDX-License-Identifier: MIT
+
+# Project
+site_name: Super-Repo Documentation
+site_url: https://rl-institut.github.io/super-repo/
+site_description: Documentation of the Super-Repo for scientific software
+
+# Repository
+repo_name: rl-institut/super-repo
+repo_url: https://github.com/rl-institut/super-repo
+docs_dir: docs
+copyright: super-repo documentation &copy; Reiner Lemoine Institut | CC-BY-4.0
+
+# Configuration
+theme:
+  name: material
+  logo: img/logo_rli_small.png
+  favicon: img/favicon_super-repo.png
+  palette:
+    # Palette toggle for dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    # Palette toggle for light mode
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  icon:
+    repo: fontawesome/brands/github
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.indexes
+    - navigation.path
+    - navigation.tracking
+    - navigation.top
+    - navigation.footer
+    - toc.follow
+
+# extensions
+markdown_extensions:
+  - toc:
+      permalink: "#"
+  - admonition
+  - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.highlight:
+      use_pygments: true
+
+plugins:
+- mkdocstrings
+- search:
+    separator: '[\s\-,:!=\[\]()"/]+|(?!\b)(?=[A-Z][a-z])|\.(?!\d)|&[lg]t;'
+
+# Customization
+extra:
+  generator: false
+  version:
+    provider: mike
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/rl-institut/super-repo
+    - icon: fontawesome/brands/mastodon
+      link: https://mastodon.social/@RL_Institut@wisskomm.social
+
+extra_css:
+  - extra.css
+
+# Navigation
+nav:
+  - Home: index.md
+  - Development:
+    - Documentation:
+      - development/documentation/index.md
+    - Collaboration:
+      - development/collaboration/index.md
+      - License and Citation: development/collaboration/license_and_citation.md
+      - Git: development/collaboration/git.md
+      - Users: development/collaboration/users.md
+      - Chat: development/collaboration/chat.md
+      - Meetings: development/collaboration/meeting.md
+      - Code of Conduct: development/collaboration/code_of_conduct.md
+    - Best Practices:
+      - development/best-practice/index.md
+      - Continuous Integration: development/best-practice/continuous_integration.md
+      - Test-Driven Development: development/best-practice/test_driven_development.md
+      - Pre-commit Hooks: development/best-practice/pre_commit_hooks.md
+      - Code Style: development/best-practice/code_style.md
+    - Release:
+      - development/release/index.md
+  - User Documentation:
+    - Install:
+      - user_documentation/install/index.md
+    - Functions:
+      - user_documentation/functions/index.md
+      - user_documentation/functions/code_example.md
+    - Tests:
+      - user_documentation/test/index.md
