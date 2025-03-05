@@ -7,8 +7,8 @@ set -o nounset
 echo COLLECTSTATIC
 python /app/manage.py collectstatic --noinput
 
-echo MIGRATE
-python /app/manage.py showmigrations --settings config.settings.production
-python /app/manage.py migrate --settings config.settings.production
+#echo MIGRATE
+#python /app/manage.py showmigrations --settings config.settings.production
+#python /app/manage.py migrate --settings config.settings.production
 
 exec /usr/local/bin/gunicorn config.wsgi --bind 0.0.0.0:5000 --chdir=/app
