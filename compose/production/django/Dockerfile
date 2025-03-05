@@ -69,6 +69,9 @@ COPY --chown=django:django ./compose/production/django/start /start
 RUN sed -i 's/\r$//g' /start
 RUN chmod +x /start
 
+COPY --chown=django:django ./compose/production/django/start_no_collectstatic /start_no_collectstatic
+RUN sed -i 's/\r$//g' /start_no_collectstatic
+RUN chmod +x /start_no_collectstatic
 
 # copy application code to WORKDIR
 COPY --chown=django:django . ${APP_HOME}
