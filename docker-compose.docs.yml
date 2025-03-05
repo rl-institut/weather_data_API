@@ -1,0 +1,16 @@
+services:
+  docs:
+    image: weather_data_api_local_docs
+    container_name: weather_data_api_local_docs
+    build:
+      context: .
+      dockerfile: ./compose/local/docs/Dockerfile
+    env_file:
+      - ./.envs/.local/.django
+    volumes:
+      - ./docs:/docs:z
+      - ./config:/app/config:z
+      - ./weather_data_api:/app/weather_data_api:z
+    ports:
+      - '9000:9000'
+    command: /start-docs
