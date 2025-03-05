@@ -171,6 +171,7 @@ typings/
 # CMake
 cmake-build-debug/
 
+.envs/
 
 ## File-based project format:
 *.iws
