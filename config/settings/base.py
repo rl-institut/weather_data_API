@@ -1,7 +1,6 @@
 # ruff: noqa: ERA001, E501
 """Base settings to build other settings files upon."""
-
-
+import os
 from pathlib import Path
 
 import environ
@@ -51,6 +50,12 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        "ENGINE": os.environ.get("SQL_ENGINE"),
+        'NAME': os.environ.get('SQL_DATABASE'),
+        'USER': os.environ.get('SQL_USER'),
+        'HOST': os.environ.get('SQL_HOST'),
+        "PASSWORD": os.environ.get("SQL_PASSWORD"),
+        "PORT": os.environ.get("SQL_PORT"),
     }
 }
 # DATABASES["default"]["ATOMIC_REQUESTS"] = True
