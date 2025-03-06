@@ -41,7 +41,7 @@ RUN addgroup --system django \
 
 # Install required system dependencies
 RUN apt-get update && apt-get install --no-install-recommends -y \
-  libffi-dev \
+  mysql-community-client \
   # psycopg dependencies
   libpq-dev \
   # Translations dependencies
@@ -51,7 +51,6 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   # cleaning up unused files
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && rm -rf /var/lib/apt/lists/*
-
 
 
 # All absolute dir copies ignore workdir instruction. All relative dir copies are wrt to the workdir instruction
