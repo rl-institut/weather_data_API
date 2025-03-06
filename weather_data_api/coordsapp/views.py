@@ -12,11 +12,15 @@ def coordinates_form(request):
         lat = float(request.POST.get("latitude"))
         lon = float(request.POST.get("longitude"))
 
-        grid_step = 0.5
-        lat_grid = ((lat + grid_step) // grid_step) * grid_step
-        lon_grid = ((lon + grid_step) // grid_step) * grid_step
-        ds = xr.open_dataset(staticfiles_storage.path("data-instant.nc"))
-        dt = ds.sel(latitude=lat_grid, longitude=lon_grid)
+        # grid_step = 0.25
+        # lat_grid = ((lat + grid_step) // grid_step) * grid_step
+        # lon_grid = ((lon + grid_step) // grid_step) * grid_step
+        # print(dt2)
+        # dt = ds.sel(latitude=lat_grid, longitude=lon_grid, method="nearest")
+        ds = xr.open_dataset(staticfiles_storage.path("download.nc"))
+        # import pdb;pdb.set_trace()
+        dt = ds.sel(latitude=lat, longitude=lon, method="nearest")
+
         df = dt.to_dataframe()
         idx = df.index
         df = df.reset_index()
@@ -26,8 +30,8 @@ def coordinates_form(request):
         json_dict = {
             "time": {"start": str(idx[0]), "end": str(idx[-1]), "freq": freq},
             "variables": {},
-            "latitude_grid": lat_grid,
-            "longitude_grid": lon_grid,
+            # "latitude_grid": lat_grid,
+            # "longitude_grid": lon_grid,
             "latitude": lat,
             "longitude": lon,
         }
@@ -70,7 +74,7 @@ def download_file(request):
 
     # Absolute path to the files folder
     files_dir = r"C:\Users\Vivek.Rana\Desktop\Projects\DjangoTask\coordproject\coordsapp\files"
-    
+
     # Generate the filename based on coordinates (you can customize this logic)
     file_name = f"{lat}_{lon}.csv"  # Example: "12.34_56.78.csv"
     file_path = os.path.join(files_dir, file_name)
