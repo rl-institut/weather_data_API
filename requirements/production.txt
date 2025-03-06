@@ -3,8 +3,8 @@
 -r base.txt
 
 gunicorn==23.0.0  # https://github.com/benoitc/gunicorn
-psycopg[c]==3.2.5  # https://github.com/psycopg/psycopg
-mysqlclient
+#psycopg[c]==3.2.5  # https://github.com/psycopg/psycopg
+mysqlclient==2.0.1
 # Django
 # ------------------------------------------------------------------------------
 django-anymail==12.0  # https://github.com/anymail/django-anymail
