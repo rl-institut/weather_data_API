@@ -12,7 +12,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   # dependencies for building Python packages
   build-essential \
   # psycopg dependencies
-  libpq-dev \
+  libpq-dev
+
 
 # Requirements are installed here to ensure they will be cached.
 COPY ./requirements .
@@ -35,7 +36,7 @@ ENV BUILD_ENV=${BUILD_ENVIRONMENT}
 WORKDIR ${APP_HOME}
 
 RUN addgroup --system django \
-  && adduser --system --ingroup django django
+    && adduser --system --ingroup django django
 
 
 # Install required system dependencies
@@ -49,7 +50,6 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   # cleaning up unused files
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && rm -rf /var/lib/apt/lists/*
-
 
 # All absolute dir copies ignore workdir instruction. All relative dir copies are wrt to the workdir instruction
 # copy python dependency wheels from python-build-stage
