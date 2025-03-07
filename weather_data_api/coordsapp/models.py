@@ -12,8 +12,8 @@ class WeatherData(models.Model):
     dni = models.FloatField(null=True, blank=True)
     dhi = models.FloatField(null=True, blank=True)
 
-    class Meta:
-        unique_together = ("dt", "lat", "lon")
+    # class Meta:
+    #     unique_together = ("dt", "lat", "lon")
 
     def __str__(self):
         return f"WeatherData({self.dt}, {self.lat}, {self.lon})"
