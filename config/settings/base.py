@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 
 import environ
+from xarray.ufuncs import less_equal
 
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 # weather_data_api/
@@ -46,16 +47,16 @@ LOCALE_PATHS = [str(BASE_DIR / "locale")]
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 # DATABASES = {"default": env.db("DATABASE_URL")}
+
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-        "ENGINE": os.environ.get("SQL_ENGINE"),
-        'NAME': os.environ.get('SQL_DATABASE'),
-        'USER': os.environ.get('SQL_USER'),
-        'HOST': os.environ.get('SQL_HOST'),
-        "PASSWORD": os.environ.get("SQL_PASSWORD"),
-        "PORT": os.environ.get("SQL_PORT"),
+        "ENGINE": os.getenv("SQL_ENGINE"),
+        'NAME': os.getenv('SQL_NAME'),
+        'USER': os.getenv('SQL_USER'),
+        'HOST': os.getenv('SQL_HOST'),
+        "PASSWORD": os.getenv("SQL_PASSWORD"),
+        "PORT": os.getenv("SQL_PORT"),
     }
 }
 # DATABASES["default"]["ATOMIC_REQUESTS"] = True
@@ -82,17 +83,18 @@ DJANGO_APPS = [
     "django.contrib.admin",
     "django.forms",
 ]
+
 THIRD_PARTY_APPS = [
     "crispy_forms",
     "crispy_bootstrap5",
-    "allauth",
-    "allauth.account",
-    "allauth.mfa",
-    "allauth.socialaccount",
+    # "allauth",
+    # "allauth.account",
+    # "allauth.mfa",
+    # "allauth.socialaccount",
 ]
 
 LOCAL_APPS = [
-    "weather_data_api.users",
+    # "weather_data_api.users",
     "weather_data_api.coordsapp",
     # Your stuff: custom apps go here
 ]
@@ -109,14 +111,14 @@ MIGRATION_MODULES = {"sites": "weather_data_api.contrib.sites.migrations"}
 # https://docs.djangoproject.com/en/dev/ref/settings/#authentication-backends
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
-    "allauth.account.auth_backends.AuthenticationBackend",
+    # "allauth.account.auth_backends.AuthenticationBackend",
 ]
-# https://docs.djangoproject.com/en/dev/ref/settings/#auth-user-model
-AUTH_USER_MODEL = "users.User"
-# https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url
-LOGIN_REDIRECT_URL = "users:redirect"
-# https://docs.djangoproject.com/en/dev/ref/settings/#login-url
-LOGIN_URL = "account_login"
+# # https://docs.djangoproject.com/en/dev/ref/settings/#auth-user-model
+# AUTH_USER_MODEL = "users.User"
+# # https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url
+# LOGIN_REDIRECT_URL = "users:redirect"
+# # https://docs.djangoproject.com/en/dev/ref/settings/#login-url
+# LOGIN_URL = "account_login"
 
 # PASSWORDS
 # ------------------------------------------------------------------------------
@@ -151,7 +153,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "allauth.account.middleware.AccountMiddleware",
+    # "allauth.account.middleware.AccountMiddleware",
 ]
 
 # STATIC
@@ -197,7 +199,7 @@ TEMPLATES = [
                 "django.template.context_processors.static",
                 "django.template.context_processors.tz",
                 "django.contrib.messages.context_processors.messages",
-                "weather_data_api.users.context_processors.allauth_settings",
+                # "weather_data_api.users.context_processors.allauth_settings",
             ],
         },
     },
@@ -244,7 +246,7 @@ ADMINS = [("""Pierre-Francois Duc""", "pierre-francois-duc@example.com")]
 MANAGERS = ADMINS
 # https://cookiecutter-django.readthedocs.io/en/latest/settings.html#other-environment-settings
 # Force the `admin` sign in process to go through the `django-allauth` workflow
-DJANGO_ADMIN_FORCE_ALLAUTH = env.bool("DJANGO_ADMIN_FORCE_ALLAUTH", default=False)
+DJANGO_ADMIN_FORCE_ALLAUTH = False #env.bool("DJANGO_ADMIN_FORCE_ALLAUTH", default=False)
 
 # LOGGING
 # ------------------------------------------------------------------------------
@@ -275,21 +277,21 @@ REDIS_SSL = REDIS_URL.startswith("rediss://")
 
 # django-allauth
 # ------------------------------------------------------------------------------
-ACCOUNT_ALLOW_REGISTRATION = env.bool("DJANGO_ACCOUNT_ALLOW_REGISTRATION", True)
-# https://docs.allauth.org/en/latest/account/configuration.html
-ACCOUNT_LOGIN_METHODS = {"username"}
-# https://docs.allauth.org/en/latest/account/configuration.html
-ACCOUNT_EMAIL_REQUIRED = True
-# https://docs.allauth.org/en/latest/account/configuration.html
-ACCOUNT_EMAIL_VERIFICATION = "mandatory"
-# https://docs.allauth.org/en/latest/account/configuration.html
-ACCOUNT_ADAPTER = "weather_data_api.users.adapters.AccountAdapter"
-# https://docs.allauth.org/en/latest/account/forms.html
-ACCOUNT_FORMS = {"signup": "weather_data_api.users.forms.UserSignupForm"}
-# https://docs.allauth.org/en/latest/socialaccount/configuration.html
-SOCIALACCOUNT_ADAPTER = "weather_data_api.users.adapters.SocialAccountAdapter"
-# https://docs.allauth.org/en/latest/socialaccount/configuration.html
-SOCIALACCOUNT_FORMS = {"signup": "weather_data_api.users.forms.UserSocialSignupForm"}
+# ACCOUNT_ALLOW_REGISTRATION = env.bool("DJANGO_ACCOUNT_ALLOW_REGISTRATION", True)
+# # https://docs.allauth.org/en/latest/account/configuration.html
+# ACCOUNT_LOGIN_METHODS = {"username"}
+# # https://docs.allauth.org/en/latest/account/configuration.html
+# ACCOUNT_EMAIL_REQUIRED = True
+# # https://docs.allauth.org/en/latest/account/configuration.html
+# ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+# # https://docs.allauth.org/en/latest/account/configuration.html
+# ACCOUNT_ADAPTER = "weather_data_api.users.adapters.AccountAdapter"
+# # https://docs.allauth.org/en/latest/account/forms.html
+# ACCOUNT_FORMS = {"signup": "weather_data_api.users.forms.UserSignupForm"}
+# # https://docs.allauth.org/en/latest/socialaccount/configuration.html
+# SOCIALACCOUNT_ADAPTER = "weather_data_api.users.adapters.SocialAccountAdapter"
+# # https://docs.allauth.org/en/latest/socialaccount/configuration.html
+# SOCIALACCOUNT_FORMS = {"signup": "weather_data_api.users.forms.UserSocialSignupForm"}
 
 
 # Your stuff...
