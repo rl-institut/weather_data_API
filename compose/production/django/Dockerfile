@@ -12,8 +12,9 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   # dependencies for building Python packages
   build-essential \
   # psycopg dependencies
-  libpq-dev
-
+  #mysql-community-client \
+  #mariadb-client
+  default-mysql-client
 
 # Requirements are installed here to ensure they will be cached.
 COPY ./requirements .
@@ -41,7 +42,8 @@ RUN addgroup --system django \
 
 # Install required system dependencies
 RUN apt-get update && apt-get install --no-install-recommends -y \
-  mysql-community-client \
+  #mysql-community-client
+  default-mysql-client \
   # psycopg dependencies
   libpq-dev \
   # Translations dependencies
