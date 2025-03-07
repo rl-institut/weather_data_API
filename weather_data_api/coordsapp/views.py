@@ -70,9 +70,12 @@ def pps_weather_data(request):
         lon_user = float(request.POST.get("longitude"))
         lat,lon = get_closest_grid_point(lat_user, lon_user)
         columns = ['wind_speed', 'temp_air', 'ghi', 'dni', 'dhi']
-        columns_fetch = ['dt'] + columns
+
+
+        #import pdb;pdb.set_trace()
         # TODO fetch colum names
-        qs = WeatherData.objects.filter(lat=lat,lon=lon,dt__gt="2022-01-01 00:00", dt__lte="2023-01-01 00:00").order_by('dt')
+        # qs = WeatherData.objects.filter(lat=lat,lon=lon,dt__gt="2022-01-01 00:00", dt__lte="2023-01-01 00:00").order_by('dt')
+        qs = WeatherData.objects.filter(lat=lat,lon=lon).order_by('dt')
         vals = qs.values(*columns)
 
         date_end = qs.order_by("-dt")[0].dt
@@ -108,8 +111,7 @@ def pps_weather_data(request):
         #     json_dict["variables"][col] = json.loads(df[col].to_json(orient="values"))
         for col in columns:
             json_dict["variables"][col] = json.loads(df[col].to_json(orient="values"))
-        import pdb;
-        pdb.set_trace()
+
         # Redirect to the download page and pass the coordinates for display
         return JsonResponse(json_dict)
         #return HttpResponseRedirect("download_file")
