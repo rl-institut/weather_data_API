@@ -27,5 +27,5 @@ for dataset in datasets:
     timeseries.append(dt)
 
 
-combined = xr.concat(timeseries, dim="valid_time", join="inner")
+combined = xr.merge(timeseries, join="inner")
 import pdb;pdb.set_trace()
