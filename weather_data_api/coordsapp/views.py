@@ -72,10 +72,10 @@ def coordinates_form(request):
             print("error with the timeseries not all indexes have the same length")
             mismatch_in_indexes = True
         else:
-            freq_ref, date_start_ref, date_stop_ref = compress_timestamps_info(timeseries[0].idx)
+            freq_ref, date_start_ref, date_stop_ref = compress_timestamps_info(timeseries[0].index)
 
             for i,ts in enumerate(timeseries[1:]):
-                freq, date_start, date_stop = compress_timestamps_info(ts.idx)
+                freq, date_start, date_stop = compress_timestamps_info(ts.index)
                 if freq != freq_ref:
                     mismatch_in_indexes =True
                 if date_start != date_start_ref:
