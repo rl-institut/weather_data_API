@@ -60,8 +60,8 @@ def coordinates_form(request):
         ts_lengths = []
         for dataset in datasets:
             ds = xr.open_dataset(staticfiles_storage.path(dataset))
-            dt = ds.sel(latitude=lat, longitude=lon, method="nearest").to_dataframe()
-            ts_lengths.append(len(dt.index))
+            dt = ds.sel(latitude=lat, longitude=lon, method="nearest")
+            ts_lengths.append(len(dt.valid_time))
             timeseries.append(dt)
 
 
@@ -83,8 +83,10 @@ def coordinates_form(request):
                 if date_stop != date_stop_ref:
                     mismatch_in_indexes =True
 
-        df = pd.concat(timeseries, axis=1)
-        #pdb.set_trace()
+        combined = xr.concat(timeseries, dim="valid_time")
+
+        df = combined.to_dataframe()
+        # pdb.set_trace()
         # ds = xr.open_dataset(staticfiles_storage.path("data-accum.nc"))
         # ds_wind = xr.open_dataset(staticfiles_storage.path("data_wind.nc"))
         # dt = ds.sel(latitude=lat, longitude=lon, method="nearest")
