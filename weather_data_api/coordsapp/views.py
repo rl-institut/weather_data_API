@@ -61,6 +61,9 @@ def coordinates_form(request):
         for dataset in datasets:
             ds = xr.open_dataset(staticfiles_storage.path(dataset))
             dt = ds.sel(latitude=lat, longitude=lon, method="nearest")
+            latitude = float(dt.latitude)
+            longitude = float(dt.longitude)
+            dt = dt.squeeze().drop_vars(["latitude", "longitude", "number", "expver"], errors="ignore")
             ts_lengths.append(len(dt.valid_time))
             timeseries.append(dt)
 
@@ -103,8 +106,8 @@ def coordinates_form(request):
         json_dict = {
             "time": {"start": str(date_start), "end": str(date_stop), "freq": freq},
             "variables": {},
-            "latitude_grid": float(df.latitude.unique()[0]),
-            "longitude_grid": float(df.longitude.unique()[0]),
+            "latitude_grid": latitude,
+            "longitude_grid": longitude,
             "latitude": lat,
             "longitude": lon,
         }
