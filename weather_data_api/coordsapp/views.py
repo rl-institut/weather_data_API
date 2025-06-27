@@ -5,8 +5,26 @@ from django.db.models import Max, Min, Count
 import os
 import xarray as xr
 import pandas as pd
+import numpy as np
 import json
 from weather_data_api.coordsapp.models import WeatherData
+
+# As the .nc files store the data more efficiently than postgres, we read from .nc files
+datasets = [
+    "data-accum.nc",
+    "download.nc",
+    "tp_evap_ssrd_2022.nc",
+    "sp_fsr_2022.nc",
+    "fdir_2022.nc",
+    "100m_u_v_wind_2022.nc"
+]
+
+def compress_timestamps_info(ts):
+    freq = pd.infer_freq(ts)
+    date_start = ts[0]
+    date_end = ts[-1]
+    return freq, date_start, date_end
+
 
 def get_closest_grid_point(lat, lon):
     lats = pd.Series([14.442, 14.192, 13.942, 13.692, 13.442, 13.192, 12.942, 12.692, 12.442,
@@ -37,17 +55,51 @@ def coordinates_form(request):
         # print(dt2)
         # dt = ds.sel(latitude=lat_grid, longitude=lon_grid, method="nearest")
         # ds = xr.open_dataset(staticfiles_storage.path("download.nc"))
-        ds = xr.open_dataset(staticfiles_storage.path("data-accum.nc"))
-        dt = ds.sel(latitude=lat, longitude=lon, method="nearest")
 
-        df = dt.to_dataframe()
+        timeseries = []
+        ts_lengths = []
+        for dataset in datasets:
+            ds = xr.open_dataset(staticfiles_storage.path(dataset))
+            dt = ds.sel(latitude=lat, longitude=lon, method="nearest").to_dataframe()
+            ts_lengths.append(len(dt.index))
+            timeseries.append(dt)
+
+
+        # import pdb;
+        # pdb.set_trace()
+        mismatch_in_indexes = False
+        if (np.diff(ts_lengths) != 0).any():
+            print("error with the timeseries not all indexes have the same length")
+            mismatch_in_indexes = True
+        else:
+            freq_ref, date_start_ref, date_stop_ref = compress_timestamps_info(timeseries[0].idx)
+
+            for i,ts in enumerate(timeseries[1:]):
+                freq, date_start, date_stop = compress_timestamps_info(ts.idx)
+                if freq != freq_ref:
+                    mismatch_in_indexes =True
+                if date_start != date_start_ref:
+                    mismatch_in_indexes =True
+                if date_stop != date_stop_ref:
+                    mismatch_in_indexes =True
+
+        df = pd.concat(timeseries, axis=1)
+        #pdb.set_trace()
+        # ds = xr.open_dataset(staticfiles_storage.path("data-accum.nc"))
+        # ds_wind = xr.open_dataset(staticfiles_storage.path("data_wind.nc"))
+        # dt = ds.sel(latitude=lat, longitude=lon, method="nearest")
+        #
+        # dt_wind = ds_wind.sel(latitude=lat, longitude=lon, method="nearest")
+        #
+        # df = dt.to_dataframe()
+        # df_wind = dt_wind.to_dataframe()
         idx = df.index
         df = df.reset_index()
-        freq = pd.infer_freq(idx)
+        freq, date_start, date_stop = compress_timestamps_info(idx)
         if freq is None:
             freq="h"
         json_dict = {
-            "time": {"start": str(idx[0]), "end": str(idx[-1]), "freq": freq},
+            "time": {"start": str(date_start), "end": str(date_stop), "freq": freq},
             "variables": {},
             "latitude_grid": float(df.latitude.unique()[0]),
             "longitude_grid": float(df.longitude.unique()[0]),
