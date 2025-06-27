@@ -86,7 +86,7 @@ def coordinates_form(request):
         #         if date_stop != date_stop_ref:
         #             mismatch_in_indexes =True
 
-        combined = xr.concat(timeseries, dim="valid_time")
+        combined = xr.merge(timeseries, join="inner")
 
         df = combined.to_dataframe()
         # pdb.set_trace()
