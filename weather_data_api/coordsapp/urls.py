@@ -7,4 +7,6 @@ urlpatterns = [
     path("", views.coordinates_form, name="coordinates_form"),
     path("pps/", views.pps_weather_data, name="pps_weather_data"),
     path("download/", views.download_file, name="download_file"),
+    path("imprint/", views.imprint, name="imprint"),
+    path("privacy/", views.privacy, name="privacy"),
 ]

@@ -1,6 +1,8 @@
 from django.http import HttpResponse, FileResponse, JsonResponse
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.shortcuts import render, HttpResponseRedirect
+from django.views.decorators.http import require_http_methods
+
 from django.db.models import Max, Min, Count
 import os
 import xarray as xr
@@ -220,3 +222,12 @@ def download_file(request):
     else:
         # If file does not exist, return an error response
         return HttpResponse("File not found for the given coordinates.", status=404)
+
+@require_http_methods(["GET"])
+def imprint(request):
+    return render(request, "pages/imprint.html")
+
+
+@require_http_methods(["GET"])
+def privacy(request):
+    return render(request, "pages/privacy.html")

@@ -76,6 +76,12 @@
             <li class="nav-item">
               <a class="nav-link" href="{% url 'about' %}">About</a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'data:imprint' %}">Imprint</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'data:privacy' %}">Privacy</a>
+            </li>
             {% if request.user.is_authenticated %}
               <li class="nav-item">
                 <a class="nav-link"

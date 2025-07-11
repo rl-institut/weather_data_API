@@ -1,3 +1,9 @@
 {% extends "base.html" %}
 
 
+{% block content %}
+    <h1>Weather Data API</h1>
+    <div>This API serves to serve weather data already downloaded from ERA5. Those data are useful to compute PVLib and WindPowerLib timeseries.</div>
+    <a href="{% url 'data:coordinates_form' %}">Get timeseries data</a>
+
+{% endblock content %}
