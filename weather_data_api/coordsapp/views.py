@@ -11,6 +11,9 @@ import numpy as np
 import json
 from weather_data_api.coordsapp.models import WeatherData
 
+import pvlib
+from feedinlib import era5
+
 # As the .nc files store the data more efficiently than postgres, we read from .nc files
 datasets = [
     "data-accum.nc",
@@ -90,6 +93,8 @@ def coordinates_form(request):
 
         combined = xr.merge(timeseries, join="inner")
 
+
+
         df = combined.to_dataframe()
         # pdb.set_trace()
         # ds = xr.open_dataset(staticfiles_storage.path("data-accum.nc"))
@@ -119,6 +124,158 @@ def coordinates_form(request):
         # Redirect to the download page and pass the coordinates for display
         return JsonResponse(json_dict)
         #return HttpResponseRedirect("download_file")
+
+    return render(request, "coordsapp/coordinates_form.html")
+
+
+def pvlib(request):
+    if request.method == "POST":
+        lat = float(request.POST.get("latitude"))
+        lon = float(request.POST.get("longitude"))
+
+        timeseries = []
+        ts_lengths = []
+        for dataset in datasets:
+            ds = xr.open_dataset(staticfiles_storage.path(dataset))
+            dt = ds.sel(latitude=lat, longitude=lon, method="nearest")
+            latitude = float(dt.latitude)
+            longitude = float(dt.longitude)
+            dt = dt.squeeze().drop_vars(["latitude", "longitude", "number", "expver"], errors="ignore")
+            ts_lengths.append(len(dt.valid_time))
+            timeseries.append(dt)
+
+        combined = xr.merge(timeseries, join="inner")
+
+        ds = combined
+
+        ds = ds.rename({"v100": "v10", "u100": "u10", "tp": "t2m"})
+
+        ds["v10"].attrs["units"] = "m/s"
+        ds["u10"].attrs["units"] = "m/s"
+
+        # from feedinlib import era5
+        # df = era5.format_pvlib(ds)
+
+        #TODO use ear5.format_pvlib
+        # compute the norm of the wind speed
+        # TODO change to u10 and v10
+        ds["wind_speed"] = np.sqrt(ds["u10"] ** 2 + ds["v10"] ** 2)
+
+        # convert temperature to Celsius (from Kelvin)
+        # TODO change to tm
+        ds["temp_air"] = ds.t2m
+
+        ds["dirhi"] = (ds.fdir / 3600.0)
+        ds["ghi"] = (ds.ssrd / 3600.0)
+
+        ds["dhi"] = (ds.ghi - ds.dirhi)
+
+        # drop not needed variables
+        pvlib_vars = ["ghi", "dhi", "wind_speed", "temp_air"]
+        ds_vars = list(ds.variables)
+        drop_vars = [
+            _
+            for _ in ds_vars
+            if _ not in pvlib_vars + ["latitude", "longitude", "time"]
+        ]
+        ds_cleaned = ds.drop_vars(drop_vars)
+
+        df = ds_cleaned.to_dataframe().reset_index()
+
+        # the time stamp given by ERA5 for mean values (probably) corresponds to
+        # the end of the valid time interval; the following sets the time stamp
+        # to the middle of the valid time interval
+        df["time"] = df.time - pd.Timedelta(minutes=30)
+
+        df.set_index(["time", "latitude", "longitude"], inplace=True)
+        df.sort_index(inplace=True)
+        df = df.tz_localize("UTC", level=0)
+
+        df = df[["wind_speed", "temp_air", "ghi", "dhi"]]
+        df.dropna(inplace=True)
+
+        # TODO here continue after pvlib
+
+
+        df = df.reset_index()
+        df = df.rename(columns={"time": "dt", "latitude": "lat", "longitude": "lon"})
+        #    df = df.rename(columns={"valid_time": "dt", "latitude": "lat", "longitude": "lon"})
+
+        df = df.set_index(["dt"])
+        df["dni"] = np.nan
+
+
+        mask = (df["lat"] == lat) & (df["lon"] == lon)
+        tmp_df = df.loc[mask]
+        solar_position = pvlib.solarposition.get_solarposition(
+            time=tmp_df.index,
+            latitude=lat,
+            longitude=lon,
+        )
+        df.loc[mask, "dni"] = pvlib.irradiance.dni(
+            ghi=tmp_df["ghi"],
+            dhi=tmp_df["dhi"],
+            zenith=solar_position["apparent_zenith"],
+        ).fillna(0)
+
+        # TODO not sure we need this from def prepare_weather_data(data_xr):
+        # df = df.reset_index()
+        # df["dt"] = df["dt"] - pd.Timedelta("30min")
+        # df["dt"] = df["dt"].dt.tz_convert("UTC").dt.tz_localize(None)
+        # df.iloc[:, 3:] = (df.iloc[:, 3:] + 0.0000001).round(1)
+        # df.loc[:, "lon"] = df.loc[:, "lon"].round(3)
+        # df.loc[:, "lat"] = df.loc[:, "lat"].round(7)
+        # df.iloc[:, 1:] = df.iloc[:, 1:].astype(str)
+
+        from pvlib.location import Location
+        from pvlib.modelchain import ModelChain
+        from pvlib.pvsystem import PVSystem
+        from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
+
+        module = pvlib.pvsystem.retrieve_sam("SandiaMod")[
+            "SolarWorld_Sunmodule_250_Poly__2013_"
+        ]
+        inverter = pvlib.pvsystem.retrieve_sam("cecinverter")[
+            "ABB__MICRO_0_25_I_OUTD_US_208__208V_"
+        ]
+        temperature_model_parameters = TEMPERATURE_MODEL_PARAMETERS["sapm"][
+            "open_rack_glass_glass"
+        ]
+        system = PVSystem(
+            surface_tilt=30,
+            surface_azimuth=180,
+            module_parameters=module,
+            inverter_parameters=inverter,
+            temperature_model_parameters=temperature_model_parameters,
+        )
+        location = Location(latitude=lat, longitude=lon)
+        mc = ModelChain(system, location)
+        mc.run_model(weather=df)
+        dc_power = mc.results.dc["p_mp"].clip(0).fillna(0) / 1000
+
+
+        # TODO finish here and return dc_power
+
+
+        idx = df.index
+        df = df.reset_index()
+        freq, date_start, date_stop = compress_timestamps_info(idx)
+        if freq is None:
+            freq = "h"
+        json_dict = {
+            "time": {"start": str(date_start), "end": str(date_stop), "freq": freq},
+            "variables": {},
+            "latitude_grid": latitude,
+            "longitude_grid": longitude,
+            "latitude": lat,
+            "longitude": lon,
+        }
+        for col in df.columns.difference(["valid_time", "latitude", "longitude"]):
+            json_dict["variables"][col] = json.loads(df[col].to_json(orient="values"))
+
+        # Redirect to the download page and pass the coordinates for display
+        return JsonResponse(json_dict)
+        # return HttpResponseRedirect("download_file")
 
     return render(request, "coordsapp/coordinates_form.html")
 
