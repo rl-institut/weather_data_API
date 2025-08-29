@@ -2,6 +2,7 @@ from django.http import HttpResponse, FileResponse, JsonResponse
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.shortcuts import render, HttpResponseRedirect
 from django.views.decorators.http import require_http_methods
+from django.middleware.csrf import get_token
 
 from django.db.models import Max, Min, Count
 import os
@@ -11,6 +12,7 @@ import numpy as np
 import json
 from weather_data_api.coordsapp.models import WeatherData
 from weather_data_api.coordsapp.utils.cf_aware import get_cf_timeseries_for_coordinate
+
 
 # As the .nc files store the data more efficiently than postgres, we read from .nc files
 datasets = [
@@ -257,3 +259,11 @@ def imprint(request):
 @require_http_methods(["GET"])
 def privacy(request):
     return render(request, "pages/privacy.html")
+
+@require_http_methods(["GET"])
+def get_csrf_token(request):
+    """
+    Return the CSRF token for this session.
+    """
+    token = get_token(request)
+    return JsonResponse({"csrfToken": token})
