@@ -14,11 +14,11 @@ from weather_data_api.coordsapp.models import WeatherData
 # As the .nc files store the data more efficiently than postgres, we read from .nc files
 datasets = [
     "data-accum.nc",
-    # "download.nc",
     "tp_evap_ssrd_2022.nc",
     "sp_fsr_2022.nc",
     "fdir_2022.nc",
     "100m_u_v_wind_2022.nc"
+    "2t_10u_10v_2022.nc"
 ]
 
 def compress_timestamps_info(ts):
