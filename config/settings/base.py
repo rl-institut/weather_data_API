@@ -48,6 +48,11 @@ LOCALE_PATHS = [str(BASE_DIR / "locale")]
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 # DATABASES = {"default": env.db("DATABASE_URL")}
 
+CSRF_TRUSTED_ORIGINS=[
+    "https://127.0.0.1:8000",
+    "http://127.0.0.1:8000"
+]
+
 
 DATABASES = {
     'default': {
@@ -222,7 +227,7 @@ FIXTURE_DIRS = (str(APPS_DIR / "fixtures"),)
 # https://docs.djangoproject.com/en/dev/ref/settings/#session-cookie-httponly
 SESSION_COOKIE_HTTPONLY = True
 # https://docs.djangoproject.com/en/dev/ref/settings/#csrf-cookie-httponly
-CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False
 # https://docs.djangoproject.com/en/dev/ref/settings/#x-frame-options
 X_FRAME_OPTIONS = "DENY"
 
