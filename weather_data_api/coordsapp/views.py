@@ -21,7 +21,8 @@ datasets = [
     "sp_fsr_2022.nc",
     "fdir_2022.nc",
     "100m_u_v_wind_2022.nc",
-    "2t_10u_10v_2022.nc"
+    "2t_10u_10v_2022.nc",
+    "2d_2022.nc",
 ]
 
 def compress_timestamps_info(ts):
