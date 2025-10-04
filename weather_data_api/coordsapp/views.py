@@ -140,6 +140,92 @@ def coordinates_form(request):
 
     return render(request, "coordsapp/coordinates_form.html")
 
+def wefe_data(request):
+    if request.method == "POST":
+        lat = float(request.POST.get("latitude"))
+        lon = float(request.POST.get("longitude"))
+
+        # grid_step = 0.25
+        # lat_grid = ((lat + grid_step) // grid_step) * grid_step
+        # lon_grid = ((lon + grid_step) // grid_step) * grid_step
+        # print(dt2)
+        # dt = ds.sel(latitude=lat_grid, longitude=lon_grid, method="nearest")
+        # ds = xr.open_dataset(staticfiles_storage.path("download.nc"))
+
+        timeseries = []
+        ts_lengths = []
+        for dataset in datasets:
+            ds = xr.open_dataset(staticfiles_storage.path(dataset))
+            dt = ds.sel(latitude=lat, longitude=lon, method="nearest")
+            latitude = float(dt.latitude)
+            longitude = float(dt.longitude)
+            dt = dt.squeeze().drop_vars(["latitude", "longitude", "number", "expver"], errors="ignore")
+            ts_lengths.append(len(dt.valid_time))
+            timeseries.append(dt)
+
+
+        # # import pdb;
+        # # pdb.set_trace()
+        # mismatch_in_indexes = False
+        # if (np.diff(ts_lengths) != 0).any():
+        #     print("error with the timeseries not all indexes have the same length")
+        #     mismatch_in_indexes = True
+        # else:
+        #     freq_ref, date_start_ref, date_stop_ref = compress_timestamps_info(timeseries[0].index)
+        #
+        #     for i,ts in enumerate(timeseries[1:]):
+        #         freq, date_start, date_stop = compress_timestamps_info(ts.index)
+        #         if freq != freq_ref:
+        #             mismatch_in_indexes =True
+        #         if date_start != date_start_ref:
+        #             mismatch_in_indexes =True
+        #         if date_stop != date_stop_ref:
+        #             mismatch_in_indexes =True
+
+        combined = xr.merge(timeseries, join="inner")
+
+        df = combined.to_dataframe()
+        # pdb.set_trace()
+        # ds = xr.open_dataset(staticfiles_storage.path("data-accum.nc"))
+        # ds_wind = xr.open_dataset(staticfiles_storage.path("data_wind.nc"))
+        # dt = ds.sel(latitude=lat, longitude=lon, method="nearest")
+        #
+        # dt_wind = ds_wind.sel(latitude=lat, longitude=lon, method="nearest")
+        #
+        # df = dt.to_dataframe()
+        # df_wind = dt_wind.to_dataframe()
+        idx = df.index
+        df = df.reset_index()
+
+        df['ghi'] = (df['ssrd'] / 3600.0)
+        df['t_air'] = df['t2m'] - 273.15
+        df['t_dew'] = df['2d'] - 273.15
+        df['e'] *= 1000
+        df['tp'] *= 1000
+        df['windspeed'] = np.sqrt(df["u100"] ** 2 + df["v100"] ** 2)
+
+        df.drop(["u10", "v10", "u100", "v100", "t2m", "ssrd", "2d"], axis=1, inplace=True)
+
+        freq, date_start, date_stop = compress_timestamps_info(idx)
+        if freq is None:
+            freq="h"
+        json_dict = {
+            "time": {"start": str(date_start), "end": str(date_stop), "freq": freq},
+            "variables": {},
+            "latitude_grid": latitude,
+            "longitude_grid": longitude,
+            "latitude": lat,
+            "longitude": lon,
+        }
+        for col in df.columns.difference(["valid_time", "latitude", "longitude"]):
+            json_dict["variables"][col] = json.loads(df[col].to_json(orient="values"))
+
+        # Redirect to the download page and pass the coordinates for display
+        return JsonResponse(json_dict)
+        #return HttpResponseRedirect("download_file")
+
+    return render(request, "coordsapp/coordinates_form.html")
+
 
 def pps_weather_data(request):
     if request.method == "POST":
