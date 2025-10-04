@@ -24,6 +24,16 @@ datasets = [
     "2d_2022.nc",
 ]
 
+wefe_datasets = [
+    "data-accum.nc",
+    "tp_evap_ssrd_2022.nc",
+    "sp_fsr_2022.nc",
+    "100m_u_v_wind_2022.nc",
+    "2t_10u_10v_2022.nc",
+    "2d_2022.nc",
+]
+
+
 def compress_timestamps_info(ts):
     freq = pd.infer_freq(ts)
     date_start = ts[0]
@@ -132,7 +142,7 @@ def wefe_data(request):
 
         timeseries = []
         ts_lengths = []
-        for dataset in datasets:
+        for dataset in wefe_datasets:
             ds = xr.open_dataset(staticfiles_storage.path(dataset))
             dt = ds.sel(latitude=lat, longitude=lon, method="nearest")
             latitude = float(dt.latitude)
@@ -155,7 +165,7 @@ def wefe_data(request):
         df['tp'] *= 1000
         df['windspeed'] = np.sqrt(df["u100"] ** 2 + df["v100"] ** 2)
 
-        df.drop(["u10", "v10", "u100", "v100", "t2m", "ssrd", "d2m"], axis=1, inplace=True)
+        df.drop(["sp", "u10", "v10", "u100", "v100", "t2m", "ssrd", "d2m"], axis=1, inplace=True)
 
         freq, date_start, date_stop = compress_timestamps_info(idx)
         if freq is None:
