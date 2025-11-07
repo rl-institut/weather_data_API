@@ -10,6 +10,7 @@ import pandas as pd
 import numpy as np
 import json
 from weather_data_api.coordsapp.models import WeatherData
+from weather_data_api.coordsapp.utils.cf_aware import get_cf_timeseries_for_coordinate
 
 # As the .nc files store the data more efficiently than postgres, we read from .nc files
 datasets = [
@@ -116,6 +117,20 @@ def coordinates_form(request):
         for col in df.columns.difference(["valid_time", "latitude", "longitude"]):
             json_dict["variables"][col] = json.loads(df[col].to_json(orient="values"))
 
+        # Extract CF (water scarcity characterization factor) timeseries
+        # This adds AWARE 2.0 water scarcity data to the response
+        # Note: CF values are static (don't vary by year), step function per month
+        try:
+            cf_timeseries = get_cf_timeseries_for_coordinate(lat, lon)
+            json_dict["variables"]["cf_aware"] = cf_timeseries
+        except Exception as e:
+            # If CF extraction fails, log the error but don't break the response
+            # Return neutral CF value (1.0) for all hours
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to extract CF data for ({lat}, {lon}): {e}")
+            json_dict["variables"]["cf_aware"] = [1.0] * 8760
+
         # Redirect to the download page and pass the coordinates for display
         return JsonResponse(json_dict)
         #return HttpResponseRedirect("download_file")
@@ -170,6 +185,17 @@ def pps_weather_data(request):
         #     json_dict["variables"][col] = json.loads(df[col].to_json(orient="values"))
         for col in columns:
             json_dict["variables"][col] = json.loads(df[col].to_json(orient="values"))
+
+        # Extract CF (water scarcity characterization factor) timeseries
+        # Note: CF values are static (don't vary by year), step function per month
+        try:
+            cf_timeseries = get_cf_timeseries_for_coordinate(lat_user, lon_user)
+            json_dict["variables"]["cf_aware"] = cf_timeseries
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to extract CF data for ({lat_user}, {lon_user}): {e}")
+            json_dict["variables"]["cf_aware"] = [1.0] * 8760
 
         # Redirect to the download page and pass the coordinates for display
         return JsonResponse(json_dict)
