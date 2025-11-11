@@ -255,6 +255,13 @@ def get_cf_timeseries_for_coordinate(lat: float, lon: float) -> List[float]:
     try:
         # Get the GeoPackage file path from Django static files
         gpkg_path = staticfiles_storage.path("AWARE20_Native_CFs_geospatial.gpkg")
+        logger.info(f"CF_aware: Looking for gpkg file at: {gpkg_path}")
+
+        # Verify file exists
+        from pathlib import Path
+        if not Path(gpkg_path).exists():
+            logger.error(f"CF_aware: File does not exist at resolved path: {gpkg_path}")
+            return [1.0] * 8760
 
         # Find nearest basin with data
         nearest_coords = find_nearest_basin_with_data(gpkg_path, lon, lat, max_search_radius=5.0)
