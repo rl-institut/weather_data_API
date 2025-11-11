@@ -158,6 +158,7 @@ def extract_cf_values_by_coordinate(
                 CF_Jul, CF_Aug, CF_Sep, CF_Oct, CF_Nov, CF_Dec
             FROM AWARE20_Native_CFs_geospatial
             WHERE ST_Contains(geom, MakePoint(?, ?, 4326))
+              AND CF_Jan IS NOT NULL
             LIMIT 1;
             """
             cursor.execute(query, (lon, lat))
@@ -172,6 +173,7 @@ def extract_cf_values_by_coordinate(
             JOIN rtree_AWARE20_Native_CFs_geospatial_geom r ON cf.rowid = r.id
             WHERE r.minx <= ? AND r.maxx >= ?
               AND r.miny <= ? AND r.maxy >= ?
+              AND cf.CF_Jan IS NOT NULL
             LIMIT 1;
             """
             cursor.execute(query, (lon, lon, lat, lat))
