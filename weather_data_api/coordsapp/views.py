@@ -196,6 +196,20 @@ def wefe_data(request):
         for col in df.columns.difference(["valid_time", "latitude", "longitude"]):
             json_dict["variables"][col] = json.loads(df[col].to_json(orient="values"))
 
+        # Extract CF (water scarcity characterization factor) timeseries
+        # This adds AWARE 2.0 water scarcity data to the response
+        # Note: CF values are static (don't vary by year), step function per month
+        try:
+            cf_timeseries = get_cf_timeseries_for_coordinate(lat, lon)
+            json_dict["variables"]["cf_aware"] = cf_timeseries
+        except Exception as e:
+            # If CF extraction fails, log the error but don't break the response
+            # Return neutral CF value (1.0) for all hours
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to extract CF data for ({lat}, {lon}): {e}")
+            json_dict["variables"]["cf_aware"] = [1.0] * 8760
+
         # Redirect to the download page and pass the coordinates for display
         return JsonResponse(json_dict)
 
