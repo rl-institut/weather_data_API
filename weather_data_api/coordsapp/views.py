@@ -151,9 +151,9 @@ def coordinates_form(request):
     return render(request, "coordsapp/coordinates_form.html")
 
 def wefe_data(request):
-    if request.method == "POST":
-        lat = float(request.POST.get("latitude"))
-        lon = float(request.POST.get("longitude"))
+    if request.method == "GET":
+        lat = float(request.GET.get("latitude"))
+        lon = float(request.GET.get("longitude"))
 
         timeseries = []
         ts_lengths = []
